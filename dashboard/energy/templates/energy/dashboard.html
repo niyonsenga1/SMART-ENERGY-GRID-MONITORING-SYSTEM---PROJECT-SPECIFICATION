@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Smart Energy Dashboard</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* General layout adjustments */
+        body {
+            background-color: #1e1e1e;
+            color: #fff;
+        }
+
+        .well {
+            background-color: #333;
+            color: #fff;
+            border: none;
+        }
+
+        h4 {
+            color: #ff5555;
+        }
+
+        /* Top stats styling */
+        .top-stats .well {
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .top-stats .icon {
+            font-size: 24px;
+            color: #ff5555;
+        }
+
+        .stat-value {
+            font-size: 24px;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+
+        /* Chart styling */
+        .chart-section h4 {
+            text-align: center;
+            color: #fff;
+        }
+
+        .chart-section canvas {
+            background-color: #2a2a2a;
+        }
+
+        /* Sidebar styles */
+        .sidenav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            background-color: #fff;
+            height: 100%;
+            width: 20%;
+            padding-top: 5px;
+            overflow-x: hidden;
+            color: #333;
+        }
+
+        .sidenav h2 {
+            color: #003366 !important;
+            display: flex;
+            align-items: center;
+        }
+
+        .sidenav img {
+            width: 100%;
+            height: auto;
+        }
+
+        .sidenav .nav>li>a {
+            color: #003366 !important;
+            padding: 10px;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .sidenav .nav>li.active>a {
+            background-color: #003366 !important;
+            color: white !important;
+        }
+
+        .sidenav .nav>li>a:hover {
+            background-color: #003366 !important;
+            color: white !important;
+        }
+
+        /* Hide sidebar on small screens */
+        @media (max-width: 767px) {
+            .sidenav {
+                display: none;
+            }
+
+            .navbar {
+                display: block;
+            }
+        }
+
+        /* Content layout styles */
+        .content {
+            margin-left: 20%;
+            padding-top: 30px;
+            padding-left: 20px;
+            padding-right: 20px;
+        }
+
+        @media (max-width: 767px) {
+            .content {
+                margin-left: 0;
+                padding-left: 15px;
+                padding-right: 15px;
+            }
+        }
+
+        /* Back to Top Button styling */
+        .back-to-top-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            color: white;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 24px;
+            box-shadow: 0px 2px 10px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+
+        .back-to-top-btn:hover {
+            background-color: darkred;
+        }
+
+        .back-to-top {
+            display: none;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Back to Top Button -->
+    <a href="#" class="back-to-top">
+        <div class="btn btn-danger back-to-top-btn">
+            <i class="fas fa-arrow-up"></i>
+        </div>
+    </a>
+
+    <!-- Navbar for small screens -->
+    <nav class="navbar navbar-inverse visible-xs">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#myNavbar">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand navbar-logo" href="#">
+                    <span>Training Centre Management System</span>
+                </a>
+            </div>
+            <div class="collapse navbar-collapse" id="myNavbar">
+                <ul class="nav navbar-nav">
+                    <li class="active"><a href="#"><i class="fas fa-tachometer-alt"></i>
+                            Dashboard</a></li>
+                    <li><a href="#"><i class="fas fa-plus-circle"></i> Add New</a></li>
+                    <li><a href="#"><i class="fas fa-list"></i> View List</a></li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Sidebar with Logo for larger screens -->
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-sm-3 sidenav">
+                    <img src="/static/images/logos.png" alt="NISR Logo">
+                    {% comment %} <h2>
+                        <span cursor="pointer">SMART ENERGY GRID MONITORING SYSTEM</span>
+                    </h2> {% endcomment %}
+                    
+                <ul class="nav nav-pills nav-stacked">
+                    <li class="active"><a href="#"><i class="fas fa-tachometer-alt icon"></i>
+                            Dashboard</a></li>
+                    {% comment %} <li><a href="#"><i class="fas fa-plus-circle icon"></i> Add New</a></li>
+                    <li><a href="#"><i class="fas fa-list icon"></i> View List</a></li> {% endcomment %}
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-sm-9 content">
+                <div class="row top-stats">
+                    <div class="col-md-3">
+                        <div class="well">
+                            <i class="fas fa-bolt icon"></i>Total Smart Meters
+                            <p class="stat-value total-meters">{{ total_meters }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="well">
+                            <i class="fas fa-database icon"></i>Total Readings
+                            <p class="stat-value total-readings">{{ total_readings }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="well">
+                            <i class="fas fa-battery-full icon"></i>Total Energy Used (kWh)
+                            <p class="stat-value total-energy">{{ total_energy }}</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="well">
+                            <i class="fas fa-calendar-week icon"></i>Total Energy Today
+                            <p class="stat-value energy-last-7days">{{ energy_today }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Chart Sections -->
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="well chart-section">
+                            <h4>Real-time Avg Power (Last Hour)</h4>
+                            <p><canvas id="realtimeChart"></canvas></p>
+                            <button class="btn btn-danger" onclick="downloadChart('realtimeChart')">Download Chart</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="well chart-section">
+                            <h4>Daily Energy Consumption (Today vs Yesterday)</h4>
+                            <p><canvas id="dailyChart"></canvas></p>
+                            <button class="btn btn-danger" onclick="downloadChart('dailyChart')">Download Chart</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6">
+                        <div class="well chart-section">
+                            <h4>Weekly Energy Trends</h4>
+                            <p><canvas id="weeklyChart"></canvas></p>
+                            <button class="btn btn-danger" onclick="downloadChart('weeklyChart')">Download Chart</button>
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="well chart-section">
+                            <h4>Monthly Energy Usage by Region</h4>
+                            <p><canvas id="monthlyRegionChart"></canvas></p>
+                            <button class="btn btn-danger" onclick="downloadChart('monthlyRegionChart')">Download Chart</button>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="well chart-section">
+                                <h4>Query Performance Metrics</h4>
+                                <p><canvas id="performanceChart"></canvas></p>
+                                <button class="btn btn-danger" onclick="downloadChart('performanceChart')">Download Chart</button>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="well chart-section">
+                                <h4>Storage Usage by Chunk Strategy</h4>
+                                <p><canvas id="chunkStrategiesChart"></canvas></p>
+                                <button class="btn btn-danger" onclick="downloadChart('chunkStrategiesChart')">Download Chart</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="well chart-section">
+                                <h4>Storage Efficiency Gains from Compression</h4>
+                                <p><canvas id="storageEfficiencyChart"></canvas></p>
+                                <button class="btn btn-danger" onclick="downloadChart('storageEfficiencyChart')">Download Chart</button>
+                            </div>
+                        </div>
+                        {% comment %} <div class="col-md-6">
+                            <div class="well chart-section">
+                                <h4>For each course, How many Number of students Registered for Male, Female and Other
+                                </h4>
+                                <p><canvas id="coursegendernumberChart"></canvas></p>
+                            </div>
+                        </div> {% endcomment %}
+                    </div>
+
+                    {% comment %} <div class="row">
+                        <div class="col-md-6">
+                            <div class="well chart-section">
+                                <h4>For each course, How many Percentage of students Registered for Male, Female and
+                                    Other</h4>
+                                <p><canvas id="courseGenderPercentageChart"></canvas></p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="well chart-section">
+                                <h4>Feedback and Rating for Each Course</h4>
+                                <p><canvas id="feedbackRatingChart"></canvas></p>
+                            </div>
+                        </div>
+                    </div> {% endcomment %}
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Back to Top Button Script -->
+        <script>
+            // Back to top button
+            $(window).scroll(function () {
+                if ($(this).scrollTop() > 300) {
+                    $('.back-to-top').fadeIn('slow');
+                } else {
+                    $('.back-to-top').fadeOut('slow');
+                }
+            });
+
+            $('.back-to-top').click(function () {
+                $('html, body').animate({
+                    scrollTop: 0
+                }, 3000, 'swing');  // Increased the scroll duration to 3000ms (3 seconds) for a slower effect
+                return false;
+            });
+
+        </script>
+
+
+    <script>
+        function fetchAndRender(id, url, renderFn) {
+            fetch(url)
+                .then(res => res.json())
+                .then(data => renderFn(id, data));
+        }
+
+        function renderRealtimeChart(id, data) {
+            new Chart(document.getElementById(id), {
+                type: 'line',
+                data: {
+                    labels: data.timestamps,
+                    datasets: [{
+                        label: 'Avg Power (W)',
+                        data: data.avg_power,
+                        backgroundColor: 'rgba(75,192,192,0.4)',
+                        borderColor: 'rgba(75,192,192,1)',
+                        borderWidth: 2
+                    }]
+                }
+            });
+        }
+
+        function renderDailyChart(id, data) {
+            new Chart(document.getElementById(id), {
+                type: 'bar',
+                data: {
+                    labels: ['Today', 'Yesterday'],
+                    datasets: [{
+                        label: 'Energy (kWh)',
+                        data: [data.today, data.yesterday],
+                        backgroundColor: ['#36a2eb', '#ff6384']
+                    }]
+                }
+            });
+        }
+
+        function renderWeeklyChart(id, data) {
+            new Chart(document.getElementById(id), {
+                type: 'line',
+                data: {
+                    labels: data.days,
+                    datasets: [{
+                        label: 'Energy (kWh)',
+                        data: data.energy,
+                        borderColor: '#ffce56',
+                        fill: false
+                    }]
+                }
+            });
+        }
+
+        function renderMonthlyRegionChart(id, data) {
+            const datasets = data.datasets.map(ds => ({
+                label: ds.label,
+                data: ds.data,
+                borderWidth: 2,
+                fill: false,
+                borderColor: '#' + Math.floor(Math.random()*16777215).toString(16)
+            }));
+
+            new Chart(document.getElementById(id), {
+                type: 'line',
+                data: {
+                    labels: data.regions,
+                    datasets: datasets
+                }
+            });
+        }
+
+        function renderPerformanceChart(id, data) {
+            new Chart(document.getElementById(id), {
+                type: 'bar',
+                data: {
+                    labels: data.query_names,
+                    datasets: [{
+                        label: 'Execution Time (ms)',
+                        data: data.times,
+                        backgroundColor: '#9966ff'
+                    }]
+                }
+            });
+        }
+
+        ///////////////////////////////////////////////////
+function renderChunkStrategiesChart(id, data) {
+    new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: {
+            labels: data.labels,
+            datasets: [{
+                label: 'Table Size (MB)',
+                data: data.sizes,
+                backgroundColor: ['#ff6384', '#36a2eb', '#ffce56']
+            }]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Storage Efficiency: Side-by-Side Chunk Strategies'
+                }
+            }
+        }
+    });
+}
+        ///////////////////////////////////////////////////
+
+        ///////////////////////////////////////////////////
+        function renderStorageEfficiencyChart(id, data) {
+    new Chart(document.getElementById(id), {
+        type: 'bar',
+        data: {
+            labels: data.tables,
+            datasets: [{
+                label: 'Total Size (MB)',
+                data: data.sizes_mb,
+                backgroundColor: ['#36a2eb', '#ff6384', '#4bc0c0']
+            }]
+        },
+        options: {
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Compressed Table Sizes by Chunk Strategy'
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Size in MB' }
+                }
+            }
+        }
+    });
+}
+
+        //////////////////////////////////////////////////
+
+        fetchAndRender('realtimeChart', '/api/realtime/', renderRealtimeChart);
+        fetchAndRender('dailyChart', '/api/daily/', renderDailyChart);
+        fetchAndRender('weeklyChart', '/api/weekly/', renderWeeklyChart);
+        fetchAndRender('monthlyRegionChart', '/api/monthly_region/', renderMonthlyRegionChart);
+        fetchAndRender('performanceChart', '/api/performance/', renderPerformanceChart);
+        fetchAndRender('chunkStrategiesChart', '/api/chunk_strategies/', renderChunkStrategiesChart);
+        fetchAndRender('storageEfficiencyChart', '/api/storage_efficiency/', renderStorageEfficiencyChart);
+    </script>
+
+
+    <script>
+  function downloadChart(chartId) {
+      const canvas = document.getElementById(chartId);
+      const link = document.createElement('a');
+      link.download = chartId + '.png';
+      link.href = canvas.toDataURL('image/png');
+      link.click();
+  }
+</script>
+
+</body>
+</html>
